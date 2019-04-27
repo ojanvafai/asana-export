@@ -1,0 +1,17 @@
+{
+  "name": "Export Asana",
+  "version": "1.0",
+  "manifest_version": 2,
+  "permissions": [
+    "tabs",
+    "https://app.asana.com/"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "browser_action": {
+    "default_icon": "incognito.png",
+    "default_title": "Export"
+  }
+}
