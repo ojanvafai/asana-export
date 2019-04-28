@@ -7,14 +7,10 @@ async function createExport(tabId) {
     })
   };
 
-
   let projects = await fetchData({json: "https://app.asana.com/api/1.0/projects"});
-
-  console.log(projects);
   let projectData = await Promise.all(projects.map(x=> fetchData(
     {json: `https://app.asana.com/api/1.0/projects/${x.id}/tasks?opt_pretty&opt_expand=(this%7Csubtasks%2B)`})));
   
-    console.log(projectData);
   let attachments = [];
   await Promise.all(projectData.map(async x=> {
     await Promise.all(x.map(async task=> {
@@ -29,8 +25,22 @@ async function createExport(tabId) {
   }));
 
   console.log(attachments);
-  // get attachment dats a files
-  // dump projects, projectData, attachments as one big zip
+
+  // get attachment data as blobs and put in the zip
+  // verify the downloaded zip has attachments properly when extracted
+
+  var zip = new JSZip();
+  zip.file("projects.json", JSON.stringify(projects));
+  zip.file("tasks.json", JSON.stringify(projectData));
+  zip.file("attachments.json", JSON.stringify(attachments));
+  let blob = await zip.generateAsync({type:"blob"});
+
+  var url = URL.createObjectURL(blob);
+  chrome.downloads.download({
+    url: url,
+    // TODO: Put the date in the name of the zip.
+    filename: "asana.zip" // Optional
+  });
 };
 
 chrome.browserAction.onClicked.addListener(async (extensionTab) => {

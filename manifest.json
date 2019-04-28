@@ -4,6 +4,7 @@
   "manifest_version": 2,
   "permissions": [
     "tabs",
+    "downloads",
     "https://app.asana.com/"
   ],
   "background": {
