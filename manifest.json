@@ -7,7 +7,7 @@
     "https://app.asana.com/"
   ],
   "background": {
-    "scripts": ["background.js"],
+    "scripts": ["jszip.js", "background.js"],
     "persistent": false
   },
   "browser_action": {
