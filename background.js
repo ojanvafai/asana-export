@@ -14,6 +14,15 @@ async function fetchBlobUrl(url) {
   });
 };
 
+function stringify(obj) {
+  return JSON.stringify(obj, (key, value) => {
+    // Prevent IDs from being converted to scientific notation.
+    if (typeof value === 'number')
+      return String(value);
+    return value;
+  });
+}
+
 async function createExport(tabId) {
   async function sendFetchRequest(options) {
     return new Promise(resolve => {
@@ -39,7 +48,9 @@ async function createExport(tabId) {
       let data = await fetchData({json: `https://app.asana.com/api/1.0/tasks/${task.id}/attachments`});
       for (let attachment of data) {
         let attachmentMetadata = await fetchData({json: `https://app.asana.com/api/1.0/attachments/${attachment.id}`});
-        let blobUrl = await sendFetchRequest({blob: attachmentMetadata.donwload_url});
+        // Dropbox download URLs incorrectly have both dl=0 and dl=1 and the dl=0 wins.
+        // Force dl=1 so it gets the dropbox download instead of the viewer.
+        let blobUrl = await sendFetchRequest({blob: attachmentMetadata.download_url.replace('dl=0', 'dl=1')});
 
         zip.folder('attachments').folder(task.id).file(attachment.name, await fetchBlobUrl(blobUrl));
         attachments.push({
@@ -50,9 +61,9 @@ async function createExport(tabId) {
     }));
   }));
 
-  zip.file("projects.json", JSON.stringify(projectMetadata));
-  zip.file("tasks.json", JSON.stringify(projectData));
-  zip.file("attachments.json", JSON.stringify(attachments));
+  zip.file("projects.json", stringify(projectMetadata));
+  zip.file("tasks.json", stringify(projectData));
+  zip.file("attachments.json", stringify(attachments));
 
   let date = new Date();
   let blob = await zip.generateAsync({type:"blob"});
