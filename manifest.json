@@ -5,6 +5,9 @@
   "permissions": [
     "tabs",
     "downloads",
+    // TODO: add for all the off-asana storage integrations, e.g.
+    // Google Drive, Box, and OneDrive.
+    "https://www.dropbox.com/",
     "https://app.asana.com/"
   ],
   "background": {
